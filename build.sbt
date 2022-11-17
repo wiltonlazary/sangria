@@ -8,7 +8,7 @@ val isScala3 = Def.setting(
 )
 
 // sbt-github-actions needs configuration in `ThisBuild`
-ThisBuild / crossScalaVersions := Seq("2.12.17", "2.13.10", "3.2.0")
+ThisBuild / crossScalaVersions := Seq("2.12.17", "2.13.10", "3.2.1")
 ThisBuild / scalaVersion := crossScalaVersions.value.tail.head
 ThisBuild / githubWorkflowBuildPreamble ++= List(
   WorkflowStep.Sbt(List("mimaReportBinaryIssues"), name = Some("Check binary compatibility")),
@@ -257,7 +257,10 @@ lazy val scalacSettings = Seq(
   scalacOptions ++= {
     if (scalaVersion.value.startsWith("2.12")) Seq("-language:higherKinds") else List.empty[String]
   },
-  scalacOptions += { if (isScala3.value) "-Xtarget:8" else "-target:jvm-1.8" },
+  scalacOptions ++= {
+    if (scalaVersion.value.startsWith("2.12")) Seq.empty
+    else Seq("-release", "8")
+  },
   autoAPIMappings := true,
   Compile / doc / scalacOptions ++= // scaladoc options
     Opts.doc.title("Sangria") ++ Seq(
